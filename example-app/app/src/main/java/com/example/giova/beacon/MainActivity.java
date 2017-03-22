@@ -12,6 +12,7 @@ import org.altbeacon.beacon.BeaconManager;
 import org.json.JSONException;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
@@ -79,7 +80,7 @@ public class MainActivity extends SandroideBaseActivity implements BeaconConsume
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                logLines.add(0,String.format("%s %s",new Date().getSeconds(),s));
+                logLines.add(0,String.format("%s %s", Calendar.getInstance().get(Calendar.SECOND),s));
                 if (logLines.size()>10) logLines.remove(logLines.size()-1);
                 logLinesAdapter.notifyDataSetChanged();
             }
@@ -94,11 +95,9 @@ public class MainActivity extends SandroideBaseActivity implements BeaconConsume
         BeaconTags.getInstance().addRangeNotifierForTag(beaconManager, "near", new TagRangeNotifier() {
             @Override
             public void onTaggedBeaconReceived(BeaconMsgBase b) {
-                addLogLine(String.format("NEAR Beacon in range for tag:%s, key:%s, ids:%s","near", b.getParserSimpleClassname(), b.getIdentifiers().toString()));
-
-                BeaconMsgBase beac = new BeaconMsgNearable(b).parse();
+                BeaconMsgNearable beac = (BeaconMsgNearable) (new BeaconMsgNearable(b).parse());
                 if (beac!=null) {
-                    addLogLine(String.format("Found my nearable: %s",beac.toString()));
+                    addLogLine(String.format("Found nearable! Temp:%s, AX: %s, AY: %s, AZ: %s",Double.valueOf(Math.round(beac.getTemp())),beac.getAccellX(),beac.getAccellY(),beac.getAccellZ()));
                     Log.i("MainActivityBeacon",String.format("Found my nearable: %s",beac.toString()));
                 } else {
                     addLogLine(String.format("This is not a nearable message: %s",b.getKeyIdentifier()));
